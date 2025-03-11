@@ -57,6 +57,8 @@ class AnimatedIntroduction extends StatefulWidget {
   ///[Function]
   final Function onDone;
 
+  final Function? onNext;
+
   /// set the color of the active indicator
   ///[Color]
   final Color activeDotColor;
@@ -107,6 +109,7 @@ class AnimatedIntroduction extends StatefulWidget {
     this.indicatorType = IndicatorType.circle,
     this.physics = const BouncingScrollPhysics(),
     this.onSkip,
+    this.onNext,
     this.nextWidget,
     this.skipWidget,
     this.doneWidget,
@@ -385,7 +388,7 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                               : InkWell(
                                   borderRadius: BorderRadius.circular(100),
                                   child: next,
-                                  onTap: () => _controller!.nextPage(
+                                  onTap: () => widget.onNext!=null ? (widget.onNext as void Function()?) : _controller!.nextPage(
                                     duration: const Duration(milliseconds: 800),
                                     curve: Curves.fastOutSlowIn,
                                   ),
