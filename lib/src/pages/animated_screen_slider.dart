@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class AnimatedIntroduction extends StatefulWidget {
-//  PageController get controller => this.createState()._controller;
+  // PageController get controller => this.createState()._controller;
 
   @override
   AnimatedIntroductionState createState() => AnimatedIntroductionState();
@@ -57,7 +57,7 @@ class AnimatedIntroduction extends StatefulWidget {
   ///[Function]
   final Function onDone;
 
-  final Function? onNext;
+  final Function(int currentPage, int previousPage)? onPageChange;
 
   /// set the color of the active indicator
   ///[Color]
@@ -109,7 +109,7 @@ class AnimatedIntroduction extends StatefulWidget {
     this.indicatorType = IndicatorType.circle,
     this.physics = const BouncingScrollPhysics(),
     this.onSkip,
-    this.onNext,
+    this.onPageChange,
     this.nextWidget,
     this.skipWidget,
     this.doneWidget,
@@ -131,6 +131,7 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
   PageController? _controller;
   double? pageOffset = 0;
   int currentPage = 0;
+  int previousPage = 0;
   bool lastPage = false;
   late AnimationController animationController;
   SingleIntroScreen? currentScreen;
@@ -141,7 +142,8 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
     _controller = PageController(
       initialPage: currentPage,
       viewportFraction: widget.viewPortFraction,
-    )..addListener(() {
+    )
+      ..addListener(() {
         pageOffset = _controller!.page;
       });
 
@@ -151,7 +153,8 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
 
   get onSkip => widget.onSkip ?? defaultOnSkip;
 
-  defaultOnSkip() => _controller?.animateToPage(
+  defaultOnSkip() =>
+      _controller?.animateToPage(
         widget.slides.length - 1,
         duration: const Duration(milliseconds: 400),
         curve: Curves.fastOutSlowIn,
@@ -159,23 +162,26 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
 
   TextStyle get textStyle =>
       currentScreen!.textStyle ??
-      Theme.of(context).textTheme.bodyLarge ??
-      const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.normal,
-        color: Colors.white,
-      );
+          Theme
+              .of(context)
+              .textTheme
+              .bodyLarge ??
+          const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.normal,
+            color: Colors.white,
+          );
 
   Widget get next =>
       widget.nextWidget ??
-      Text(
-        widget.nextText,
-        style: textStyle.apply(
-          color: widget.textColor,
-          fontSizeFactor: .9,
-          fontWeightDelta: 1,
-        ),
-      );
+          Text(
+            widget.nextText,
+            style: textStyle.apply(
+              color: widget.textColor,
+              fontSizeFactor: .9,
+              fontWeightDelta: 1,
+            ),
+          );
 
   Widget get skip =>
       widget.skipWidget ??
@@ -190,14 +196,14 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
 
   Widget get done =>
       widget.doneWidget ??
-      Text(
-        widget.doneText,
-        style: textStyle.apply(
-          color: widget.textColor,
-          fontSizeFactor: .9,
-          fontWeightDelta: 1,
-        ),
-      );
+          Text(
+            widget.doneText,
+            style: textStyle.apply(
+              color: widget.textColor,
+              fontSizeFactor: .9,
+              fontWeightDelta: 1,
+            ),
+          );
 
   @override
   void dispose() {
@@ -208,14 +214,15 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
 
   bool get existGradientColors => widget.footerGradients.isNotEmpty && widget.footerGradients.length > 1;
 
-  LinearGradient get gradients => existGradientColors
-      ? LinearGradient(colors: widget.footerGradients, begin: Alignment.topLeft, end: Alignment.topRight)
-      : LinearGradient(
-          colors: [
-            widget.footerBgColor,
-            widget.footerBgColor,
-          ],
-        );
+  LinearGradient get gradients =>
+      existGradientColors
+          ? LinearGradient(colors: widget.footerGradients, begin: Alignment.topLeft, end: Alignment.topRight)
+          : LinearGradient(
+        colors: [
+          widget.footerBgColor,
+          widget.footerBgColor,
+        ],
+      );
 
   int getCurrentPage() => _controller!.page!.floor();
 
@@ -247,6 +254,9 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                       lastPage = false;
                       animationController.reverse();
                     }
+
+                    widget.onPageChange?.call(currentPage, previousPage);
+                    previousPage = currentPage;
                   });
                 },
                 controller: _controller,
@@ -280,7 +290,9 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                 bottom: 0,
                 left: 0,
                 right: 0,
-                top: widget.topHeightForFooter ?? MediaQuery.sizeOf(context).height * .72,
+                top: widget.topHeightForFooter ?? MediaQuery
+                    .sizeOf(context)
+                    .height * .72,
                 child: Container(
                   padding: widget.footerPadding,
                   decoration: BoxDecoration(
@@ -381,18 +393,19 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                           type: MaterialType.transparency,
                           child: lastPage
                               ? InkWell(
-                                  borderRadius: BorderRadius.circular(100),
-                                  onTap: widget.onDone as void Function()?,
-                                  child: done,
-                                )
+                            borderRadius: BorderRadius.circular(100),
+                            onTap: widget.onDone as void Function()?,
+                            child: done,
+                          )
                               : InkWell(
-                                  borderRadius: BorderRadius.circular(100),
-                                  child: next,
-                                  onTap: () => widget.onNext!=null ? (widget.onNext as void Function()?) : _controller!.nextPage(
-                                    duration: const Duration(milliseconds: 800),
-                                    curve: Curves.fastOutSlowIn,
-                                  ),
+                            borderRadius: BorderRadius.circular(100),
+                            child: next,
+                            onTap: () =>
+                                _controller!.nextPage(
+                                  duration: const Duration(milliseconds: 800),
+                                  curve: Curves.fastOutSlowIn,
                                 ),
+                          ),
                         )
                       ],
                     ),
@@ -408,13 +421,13 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
 
   Widget buildPage({required int index, double angle = 0.0, double scale = 1.0}) =>
       // print(pageOffset - index);
-      Container(
-        color: Colors.transparent,
-        child: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, .001)
-            ..rotateY(angle),
-          child: widget.slides[index],
-        ),
-      );
+  Container(
+    color: Colors.transparent,
+    child: Transform(
+      transform: Matrix4.identity()
+        ..setEntry(3, 2, .001)
+        ..rotateY(angle),
+      child: widget.slides[index],
+    ),
+  );
 }
