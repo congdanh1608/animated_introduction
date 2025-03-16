@@ -98,6 +98,7 @@ class AnimatedIntroduction extends StatefulWidget {
   ///[bool]
   ///is the screen full screen with systemNavigationBarColor
   final bool isFullScreen;
+  final bool allowSkipPage;
 
   const AnimatedIntroduction({
     super.key,
@@ -124,6 +125,7 @@ class AnimatedIntroduction extends StatefulWidget {
     this.footerBgColor = const Color(0xff51adf6),
     this.topHeightForFooter,
     this.isFullScreen = false,
+    this.allowSkipPage = true,
   }) : assert(slides.length > 0);
 }
 
@@ -353,7 +355,7 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                         IgnorePointer(
                           ignoring: lastPage,
                           child: Opacity(
-                            opacity: lastPage ? 0.0 : 1.0,
+                            opacity: (lastPage || !widget.allowSkipPage) ? 0.0 : 1.0,
                             child: Material(
                               type: MaterialType.transparency,
                               child: InkWell(
@@ -385,28 +387,30 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                             ),
                           ),
                         ),
-                        Material(
-                          clipBehavior: Clip.antiAlias,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(100),
+                        Opacity(opacity: (!widget.allowSkipPage) ? 0.0 : 1.0,
+                          child: Material(
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            type: MaterialType.transparency,
+                            child: lastPage
+                                ? InkWell(
+                              borderRadius: BorderRadius.circular(100),
+                              onTap: widget.onDone as void Function()?,
+                              child: done,
+                            )
+                                : InkWell(
+                              borderRadius: BorderRadius.circular(100),
+                              child: next,
+                              onTap: () =>
+                                  _controller!.nextPage(
+                                    duration: const Duration(milliseconds: 800),
+                                    curve: Curves.fastOutSlowIn,
+                                  ),
+                            ),
                           ),
-                          type: MaterialType.transparency,
-                          child: lastPage
-                              ? InkWell(
-                            borderRadius: BorderRadius.circular(100),
-                            onTap: widget.onDone as void Function()?,
-                            child: done,
-                          )
-                              : InkWell(
-                            borderRadius: BorderRadius.circular(100),
-                            child: next,
-                            onTap: () =>
-                                _controller!.nextPage(
-                                  duration: const Duration(milliseconds: 800),
-                                  curve: Curves.fastOutSlowIn,
-                                ),
-                          ),
-                        )
+                        ),
                       ],
                     ),
                   ),
