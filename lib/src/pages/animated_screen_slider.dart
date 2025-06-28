@@ -324,7 +324,8 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 10),
-                          Text(
+                          currentScreen!.description?.isNotEmpty == true
+                              ? Text(
                             currentScreen!.description!,
                             softWrap: true,
                             style: textStyle.apply(
@@ -332,7 +333,7 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                               fontSizeFactor: .9,
                             ),
                             textAlign: TextAlign.center,
-                          ),
+                          ) : (currentScreen!.descriptionWidget ?? SizedBox.shrink()),
                           const SizedBox(height: 20),
                         ],
                       ),
@@ -417,9 +418,10 @@ class AnimatedIntroductionState extends State<AnimatedIntroduction> with TickerP
                 ),
               ),
             ],
-          ),
-        ),
-      ),
+          ),)
+        ,
+      )
+      ,
     );
   }
 
