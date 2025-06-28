@@ -10,6 +10,7 @@ class SingleIntroScreen extends StatelessWidget {
   ///description of your slide
   ///[String]
   final String? description;
+  final Widget? descriptionWidget;
 
   ///image path for your slide
   ///[String]
@@ -58,7 +59,8 @@ class SingleIntroScreen extends StatelessWidget {
   const SingleIntroScreen({
     super.key,
     required this.title,
-    required this.description,
+    this.description,
+    this.descriptionWidget,
     this.slidePagePadding = const EdgeInsets.all(12),
     this.headerWidget,
     this.headerBgColor,
